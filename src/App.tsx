@@ -30,9 +30,19 @@ export default function App() {
   React.useEffect(() => {
     const tasks = localStorage.getItem('tasks');
     if (tasks) {
-      setData((prev) => [...prev, ...JSON.parse(tasks)]);
+      setData((prev) => {
+        const localData = [...prev, ...JSON.parse(tasks)] as TZTaskSchema[];
+
+        const uniqueIds = Array.from(new Set(localData.map((task) => task.id)));
+        const uniqueTasks = uniqueIds.map(findTaskById(localData));
+        return uniqueTasks;
+      });
     }
   }, []);
+  function findTaskById(tasks: TZTaskSchema[]) {
+    return (id: string) => tasks.find((task) => task.id === id)!;
+  }
+
   return (
     <React.Fragment>
       <Header setData={setData} />

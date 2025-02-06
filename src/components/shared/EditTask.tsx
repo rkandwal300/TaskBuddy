@@ -25,8 +25,8 @@ export default function EditTask({ data, setData }: Props) {
           <span>
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger>
-                  <Button variant="ghost">
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="p-0">
                     <PencilIcon />
                   </Button>
                 </TooltipTrigger>

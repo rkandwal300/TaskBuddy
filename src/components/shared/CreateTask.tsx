@@ -9,6 +9,7 @@ import {
   TZTaskSchema,
 } from '../../lib/validation/task';
 import { Button } from '../ui/button';
+import { DialogTitle } from '../ui/dialog';
 import {
   Form,
   FormControl,
@@ -29,7 +30,7 @@ import {
 type Props = Readonly<{
   setOpen: (b: boolean) => void;
   setData: (data: TZTaskSchema[]) => void;
-  initialValues: TZTaskSchema;
+  initialValues?: TZTaskSchema;
 }>;
 export default function CreateTask({ setOpen, initialValues, setData }: Props) {
   const form = useForm<TZCreateTaskSchema>({
@@ -60,8 +61,9 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
         ...previousTask,
         { ...values, id: 'task-' + previousTask.length + 1 },
       ];
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     }
+    console.log(updatedTasks);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     setData(updatedTasks);
     setOpen(false);
   }
@@ -69,10 +71,10 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex items-center justify-between p-4 border-b">
+        <DialogTitle className="flex items-center justify-between p-4 border-b">
           <span className="font-medium text-base"> Create Task</span>
           <Button type="submit">Submit</Button>
-        </div>
+        </DialogTitle>
         <div className="p-4 flex flex-col gap-4">
           <FormField
             control={form.control}
