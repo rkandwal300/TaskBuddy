@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import Header from './components/shared/Header';
+import TaskList from './components/shared/TaskList';
+import { category, priority, TZTaskSchema } from './lib/validation/task';
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
+  const [data, setData] = React.useState<TZTaskSchema[]>([
+    {
+      id: '1',
+      name: 'Create a new task',
+      category: category.other,
+      priority: priority.LOW,
+      completed: false,
+    },
+    {
+      id: '2',
+      name: 'Complete the task',
+      category: category.work,
+      priority: priority.HIGH,
+      completed: false,
+    },
+    {
+      id: '3',
+      name: 'Delete the task',
+      category: category.personal,
+      priority: priority.MEDIUM,
+      completed: false,
+    },
+  ]);
+  React.useEffect(() => {
+    const tasks = localStorage.getItem('tasks');
+    if (tasks) {
+      setData((prev) => [...prev, ...JSON.parse(tasks)]);
+    }
+  }, []);
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <React.Fragment>
+      <Header setData={setData} />
+      <TaskList data={data} setData={setData} />
+    </React.Fragment>
+  );
 }
-
-export default App
