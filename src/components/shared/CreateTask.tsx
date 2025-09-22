@@ -8,6 +8,8 @@ import {
   TZCreateTaskSchema,
   TZTaskSchema,
 } from '../../lib/validation/task';
+import { TaskWithMeta } from '../../state/tasks';
+import { taskOperations } from '../../state/sync';
 import { Button } from '../ui/button';
 import { DialogTitle } from '../ui/dialog';
 import {
@@ -29,10 +31,12 @@ import {
 
 type Props = Readonly<{
   setOpen: (b: boolean) => void;
-  setData: (data: TZTaskSchema[]) => void;
-  initialValues?: TZTaskSchema;
+  onSubmit?: (task: TZTaskSchema) => Promise<void>;
+  initialValues?: TaskWithMeta;
+  isEditing?: boolean;
 }>;
-export default function CreateTask({ setOpen, initialValues, setData }: Props) {
+
+export default function CreateTask({ setOpen, onSubmit, initialValues, isEditing = false }: Props) {
   const form = useForm<TZCreateTaskSchema>({
     resolver: zodResolver(CreateTaskSchema),
     defaultValues: initialValues ?? {
@@ -41,39 +45,42 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
       createdAt: new Date().toISOString(),
     },
   });
-  function onSubmit(values: TZCreateTaskSchema) {
-    const previousTaskStringified = localStorage.getItem('tasks');
 
-    let previousTask: TZTaskSchema[] = [];
-    if (previousTaskStringified) {
-      previousTask = JSON.parse(previousTaskStringified);
+  async function handleSubmit(values: TZCreateTaskSchema) {
+    try {
+      if (isEditing && initialValues && onSubmit) {
+        // Edit existing task
+        const updatedTask: TZTaskSchema = {
+          ...initialValues,
+          ...values,
+        };
+        await onSubmit(updatedTask);
+      } else {
+        // Create new task
+        await taskOperations.create({
+          name: values.name,
+          category: values.category,
+          priority: values.priority,
+          completed: values.completed || false,
+        });
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      // Handle error - maybe show a toast
     }
-    let updatedTasks = [];
-    if (initialValues) {
-      updatedTasks = previousTask.map((item) => {
-        if (item.id === initialValues.id) {
-          return { ...values, id: initialValues.id };
-        }
-        return item;
-      });
-    } else {
-      updatedTasks = [
-        ...previousTask,
-        { ...values, id: 'task-' + previousTask.length + 1 },
-      ];
-    }
-    console.log(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    setData(updatedTasks);
-    setOpen(false);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
         <DialogTitle className="flex items-center justify-between p-4 border-b">
-          <span className="font-medium text-base"> Create Task</span>
-          <Button type="submit">Submit</Button>
+          <span className="font-medium text-base">
+            {isEditing ? 'Edit Task' : 'Create Task'}
+          </span>
+          <Button type="submit">
+            {isEditing ? 'Update' : 'Create'}
+          </Button>
         </DialogTitle>
         <div className="p-4 flex flex-col gap-4">
           <FormField
@@ -81,11 +88,10 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Task Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="task" {...field} />
+                  <Input placeholder="Enter task name" {...field} />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -100,7 +106,7 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full border rounded-sm h-9">
-                        <SelectValue placeholder="Select">
+                        <SelectValue placeholder="Select priority">
                           <span className="text-start capitalize">
                             {field.value}
                           </span>
@@ -121,7 +127,6 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                       </SelectContent>
                     </Select>
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -138,7 +143,7 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                       <SelectTrigger className="w-full border rounded-sm h-9">
                         <SelectValue
                           className="text-start capitalize"
-                          placeholder="Select"
+                          placeholder="Select category"
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -156,7 +161,6 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                       </SelectContent>
                     </Select>
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
