@@ -23,6 +23,7 @@ const CreateTaskSchema = z.object({
 
 const TaskSchema = CreateTaskSchema.extend({
   id: z.string().nonempty({ message: 'Task id cannot be empty' }),
+  createdAt: z.string().nonempty({ message: 'Created date cannot be empty' }),
 });
 
 type TZTaskSchema = z.infer<typeof TaskSchema>;

@@ -14,15 +14,13 @@ import {
 import EditTask from './EditTask';
 
 type Props = Readonly<{
-  data: TZTaskSchema;
-  setData: (data: TZTaskSchema[]) => void;
+  data: TZTaskSchema; 
   setCompleted: (data: TZTaskSchema) => void;
   setDelete: (data: TZTaskSchema) => void;
 }>;
 export default function Task({
   data,
-  setCompleted,
-  setData,
+  setCompleted, 
   setDelete,
 }: Props) {
   const selectedPriority = priorityStatusList.find(
@@ -76,7 +74,7 @@ export default function Task({
       </div>
       <div className="flex items-center gap-2">
         <div className="flex items-center justify-center">
-          <EditTask data={data} setData={setData} />
+          <EditTask data={data}  />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

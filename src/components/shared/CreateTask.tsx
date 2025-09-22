@@ -26,45 +26,37 @@ import {
   SelectItem,
   SelectValue,
 } from '../ui/select';
+import { useTasks } from '../../hooks/useTasks';
 
 type Props = Readonly<{
   setOpen: (b: boolean) => void;
-  setData: (data: TZTaskSchema[]) => void;
   initialValues?: TZTaskSchema;
 }>;
-export default function CreateTask({ setOpen, initialValues, setData }: Props) {
+export default function CreateTask({ setOpen, initialValues }: Props) {
+  const { addTask, updateTask } = useTasks();
+
   const form = useForm<TZCreateTaskSchema>({
     resolver: zodResolver(CreateTaskSchema),
     defaultValues: initialValues ?? {
       name: '',
+      priority: priority.LOW,
+      category: category.personal,
       completed: false,
       createdAt: new Date().toISOString(),
     },
   });
   function onSubmit(values: TZCreateTaskSchema) {
-    const previousTaskStringified = localStorage.getItem('tasks');
 
-    let previousTask: TZTaskSchema[] = [];
-    if (previousTaskStringified) {
-      previousTask = JSON.parse(previousTaskStringified);
-    }
-    let updatedTasks = [];
     if (initialValues) {
-      updatedTasks = previousTask.map((item) => {
-        if (item.id === initialValues.id) {
-          return { ...values, id: initialValues.id };
-        }
-        return item;
-      });
+      updateTask({ ...initialValues, ...values });
     } else {
-      updatedTasks = [
-        ...previousTask,
-        { ...values, id: 'task-' + previousTask.length + 1 },
-      ];
+      addTask({ 
+        ...values, 
+        id: 'task-' + crypto.randomUUID(), 
+        completed: false,
+        createdAt: new Date().toISOString()
+      });
     }
-    console.log(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    setData(updatedTasks);
     setOpen(false);
   }
 
