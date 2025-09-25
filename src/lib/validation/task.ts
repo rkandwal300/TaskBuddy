@@ -1,28 +1,30 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export enum priority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  URGENT = 'urgent',
+export enum PRIORITY {
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  URGENT = "urgent",
 }
-export enum category {
-  work = 'work',
-  personal = 'personal',
-  shopping = 'shopping',
-  other = 'other',
+
+export enum CATEGORY {
+  WORK = "work",
+  PERSONAL = "personal",
+  SHOPPING = "shopping",
+  OTHER = "other",
 }
+
 const CreateTaskSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().nonempty({ message: 'Task name cannot be empty' }),
-  priority: z.nativeEnum(priority),
-  category: z.nativeEnum(category),
+  name: z.string().nonempty({ message: "Task name cannot be empty" }),
+  priority: z.nativeEnum(PRIORITY),
+  category: z.nativeEnum(CATEGORY),
   completed: z.boolean(),
-  createdAt: z.string().optional(),
 });
 
 const TaskSchema = CreateTaskSchema.extend({
-  id: z.string().nonempty({ message: 'Task id cannot be empty' }),
+  id: z.string().nonempty({ message: "Task id cannot be empty" }),
+
+  createdAt: z.date().optional(),
 });
 
 type TZTaskSchema = z.infer<typeof TaskSchema>;

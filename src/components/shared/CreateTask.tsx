@@ -2,14 +2,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SelectTrigger } from '@radix-ui/react-select';
 import { useForm } from 'react-hook-form';
 import {
-  category,
+  CATEGORY,
   CreateTaskSchema,
-  priority,
+  PRIORITY,
   TZCreateTaskSchema,
   TZTaskSchema,
 } from '../../lib/validation/task';
 import { Button } from '../ui/button';
-import { DialogTitle } from '../ui/dialog';
+import { DialogDescription, DialogTitle } from '../ui/dialog';
 import {
   Form,
   FormControl,
@@ -26,45 +26,28 @@ import {
   SelectItem,
   SelectValue,
 } from '../ui/select';
+import {  storeActions } from '../../lib/store/store';
 
 type Props = Readonly<{
   setOpen: (b: boolean) => void;
-  setData: (data: TZTaskSchema[]) => void;
   initialValues?: TZTaskSchema;
 }>;
-export default function CreateTask({ setOpen, initialValues, setData }: Props) {
+export default function CreateTask({ setOpen, initialValues }: Props) {
   const form = useForm<TZCreateTaskSchema>({
     resolver: zodResolver(CreateTaskSchema),
     defaultValues: initialValues ?? {
       name: '',
       completed: false,
-      createdAt: new Date().toISOString(),
     },
   });
   function onSubmit(values: TZCreateTaskSchema) {
-    const previousTaskStringified = localStorage.getItem('tasks');
 
-    let previousTask: TZTaskSchema[] = [];
-    if (previousTaskStringified) {
-      previousTask = JSON.parse(previousTaskStringified);
-    }
-    let updatedTasks = [];
     if (initialValues) {
-      updatedTasks = previousTask.map((item) => {
-        if (item.id === initialValues.id) {
-          return { ...values, id: initialValues.id };
-        }
-        return item;
-      });
-    } else {
-      updatedTasks = [
-        ...previousTask,
-        { ...values, id: 'task-' + previousTask.length + 1 },
-      ];
+      storeActions.updateTask(initialValues.id, values);
     }
-    console.log(updatedTasks);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    setData(updatedTasks);
+    else {
+      storeActions.addTask(values);
+    }
     setOpen(false);
   }
 
@@ -72,7 +55,7 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <DialogTitle className="flex items-center justify-between p-4 border-b">
-          <span className="font-medium text-base"> Create Task</span>
+          <DialogDescription className="font-medium text-base"> Create Task</DialogDescription>
           <Button type="submit">Submit</Button>
         </DialogTitle>
         <div className="p-4 flex flex-col gap-4">
@@ -108,7 +91,7 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          {Object.values(priority).map((item) => (
+                          {Object.values(PRIORITY).map((item) => (
                             <SelectItem
                               key={item}
                               value={item}
@@ -135,15 +118,15 @@ export default function CreateTask({ setOpen, initialValues, setData }: Props) {
                   <FormLabel>Category</FormLabel>
                   <FormControl>
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full border rounded-sm h-9">
+                      <SelectTrigger className="w-full border capitalize rounded-sm h-9">
                         <SelectValue
-                          className="text-start capitalize"
+                          className="text-start"
                           placeholder="Select"
                         />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          {Object.values(category).map((item) => (
+                          {Object.values(CATEGORY).map((item) => (
                             <SelectItem
                               key={item}
                               value={item}

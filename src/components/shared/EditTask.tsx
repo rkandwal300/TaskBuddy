@@ -12,11 +12,10 @@ import {
 import CreateTask from './CreateTask';
 
 type Props = Readonly<{
-  setData: (data: TZTaskSchema[]) => void;
   data: TZTaskSchema;
 }>;
 
-export default function EditTask({ data, setData }: Props) {
+export default function EditTask({ data }: Props) {
   const [open, setOpen] = React.useState(false);
   return (
     <div className="flex p-4 justify-between items-center border-b">
@@ -38,7 +37,6 @@ export default function EditTask({ data, setData }: Props) {
         <DialogContent className="p-0">
           <CreateTask
             setOpen={setOpen}
-            setData={setData}
             initialValues={data}
           />
         </DialogContent>

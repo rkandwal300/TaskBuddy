@@ -12,23 +12,23 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip';
 import EditTask from './EditTask';
+import { storeActions } from '../../lib/store/store';
 
 type Props = Readonly<{
   data: TZTaskSchema;
-  setData: (data: TZTaskSchema[]) => void;
-  setCompleted: (data: TZTaskSchema) => void;
-  setDelete: (data: TZTaskSchema) => void;
 }>;
 export default function Task({
-  data,
-  setCompleted,
-  setData,
-  setDelete,
+  data
 }: Props) {
   const selectedPriority = priorityStatusList.find(
     (val) => val.value === data.priority
   );
-
+  const handleToggleTask = (taskId: string) => {
+    storeActions.toggleTask(taskId);
+  };
+  const handleDeleteTask = (task: TZTaskSchema) => {
+    storeActions.deleteTask(task.id);
+  }
   return (
     <div
       className={cn(
@@ -40,8 +40,8 @@ export default function Task({
         <div className="flex justify-center items-center gap-2">
           <Checkbox
             checked={data.completed}
-            onCheckedChange={(checked) => {
-              setCompleted({ ...data, completed: Boolean(checked) });
+            onCheckedChange={() => {
+              handleToggleTask(data.id);
             }}
           />
           <span className="font-medium">{data.name}</span>
@@ -76,14 +76,14 @@ export default function Task({
       </div>
       <div className="flex items-center gap-2">
         <div className="flex items-center justify-center">
-          <EditTask data={data} setData={setData} />
+          <EditTask data={data} />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   className="p-0"
                   variant="ghost"
-                  onClick={() => setDelete(data)}
+                  onClick={() => handleDeleteTask(data)}
                 >
                   <Trash2 className="text-destructive" />
                 </Button>

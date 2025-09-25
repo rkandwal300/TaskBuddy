@@ -1,13 +1,9 @@
-import React from 'react';
-import { TZTaskSchema } from '../../lib/validation/task';
+import React from 'react'; 
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import CreateTask from './CreateTask';
-
-type Props = Readonly<{
-  setData: (data: TZTaskSchema[]) => void;
-}>;
-export default function Header({ setData }: Props) {
+ 
+export default function Header( ) {
   const [open, setOpen] = React.useState(false);
   return (
     <div className="flex p-4 justify-between items-center border-b">
@@ -17,7 +13,7 @@ export default function Header({ setData }: Props) {
           <Button>Create</Button>
         </DialogTrigger>
         <DialogContent className="p-0">
-          <CreateTask setOpen={setOpen} setData={setData} />
+          <CreateTask setOpen={setOpen}   />
         </DialogContent>
       </Dialog>
     </div>
